@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rim/db_provider.dart';
+import 'package:rim/main.dart';
 
 class AddPost extends StatelessWidget{
   final TextEditingController _txController = new TextEditingController();
@@ -28,14 +29,20 @@ class AddPost extends StatelessWidget{
               child: TextButton(
                 child: Text('Post'),
                 onPressed: (){
-                  DBProvider.create(_txController.text);
-                  Navigator.of(context).pop();
+                  if(_txController.text.isNotEmpty){
+                    DBProvider.create(_txController.text);
+                    Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(builder: (context) => Archive()),
+                            (_) => false);
+                  }
                 },
               ),
             ),
             SingleChildScrollView(
               child: Container(
                 child: TextField(
+                  maxLines: null,
                   controller: _txController,
                   keyboardType: TextInputType.multiline,
                   decoration: InputDecoration(

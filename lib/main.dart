@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:rim/add_post.dart';
@@ -20,14 +22,15 @@ class MyApp extends StatelessWidget{
       theme: ThemeData(
         primaryColor: Colors.white,
         visualDensity: VisualDensity.adaptivePlatformDensity,
+        fontFamily: 'GenEiKoburi'
       ),
-      home: _Archive(),
+      home: Archive(),
 
     );
   }
 }
 
-class _Archive extends StatelessWidget{
+class Archive extends StatelessWidget{
 
   @override
   Widget build(BuildContext context) {
@@ -39,18 +42,24 @@ class _Archive extends StatelessWidget{
         body: Column(
           children: [
             Expanded(
-              child: FutureBuilder(
-                future: DBProvider.getAll(),
-                builder:(BuildContext context, AsyncSnapshot snapshot){
-                  int gridCount = context.select((MainModel value) => value.currentSliderValue).toInt();
-                  if(snapshot == null)return Center(child: Text('no item'),);
-                  return GridView.count(
-                    crossAxisCount: gridCount,
-                    children: snapshot.data.map((post){
-                      return _Rim(post: post,);
-                    }),
-                  );
-                }
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                child: FutureBuilder(
+                  future: DBProvider.getAll(),
+                  builder:(BuildContext context, AsyncSnapshot snapshot) {
+                    int gridCount = context.select((MainModel value) =>
+                    value.currentSliderValue).toInt();
+                    if (!snapshot.hasData) {
+                      return Center(child: Text('no item'),);
+                    } else {
+                      return GridView.count(
+                        crossAxisCount: gridCount,
+                        children: List.generate(snapshot.data.length, (index) => _Rim(post: snapshot.data[index]))
+                        ,
+                      );
+                    }
+                  }
+                ),
               )
             ),
             Container(
@@ -60,7 +69,8 @@ class _Archive extends StatelessWidget{
           ],
         ),
         floatingActionButton: FloatingActionButton(
-          child: Icon(Icons.add),
+          backgroundColor: Colors.white,
+          child: Icon(Icons.add,color: Colors.grey,),
           onPressed: (){
             Navigator.of(context).push(MaterialPageRoute(builder: (context)=>AddPost()));
           },
@@ -104,7 +114,14 @@ class _GridSlider extends StatelessWidget{
   }
 }
 
-final String url = 'https://pro2-bar-s3-cdn-cf4.myportfolio.com/c5cab9ad-7bfc-47d4-9c71-feeeab8bf97d/f7fe0671-eae4-4b66-8aa2-ae0519279a5c_rw_1920.jpg?h=3df818a92f73c21875c39fad9b1ca8b1';
+final List url = [
+  'https://pro2-bar-s3-cdn-cf4.myportfolio.com/c5cab9ad-7bfc-47d4-9c71-feeeab8bf97d/f7fe0671-eae4-4b66-8aa2-ae0519279a5c_rw_1920.jpg?h=3df818a92f73c21875c39fad9b1ca8b1',
+  'https://pro2-bar-s3-cdn-cf2.myportfolio.com/c5cab9ad-7bfc-47d4-9c71-feeeab8bf97d/31310ead-c642-4aaf-9cdc-b1c23b695410_rw_1920.jpg?h=2d4c726747edbac689d07f03839dc39c',
+  'https://pro2-bar-s3-cdn-cf2.myportfolio.com/c5cab9ad-7bfc-47d4-9c71-feeeab8bf97d/da45a202-cce7-4052-b5ab-3e7fc5ae8c7a_rw_1920.jpg?h=210fe85b738ca839dfeff04e5d73b72b',
+  'https://pro2-bar-s3-cdn-cf3.myportfolio.com/c5cab9ad-7bfc-47d4-9c71-feeeab8bf97d/44d4c2e5-38bb-493f-a116-6c2588f90560_rw_1920.jpg?h=44f3e7be4840f9dd02515f4049928b52',
+  'https://pro2-bar-s3-cdn-cf3.myportfolio.com/c5cab9ad-7bfc-47d4-9c71-feeeab8bf97d/ec8a4828-728b-40e7-8eac-823940e9eb0c_rw_1920.jpg?h=af0575cb6bb0b5be01bfc8a3790a94dd',
+  'https://pro2-bar-s3-cdn-cf6.myportfolio.com/c5cab9ad-7bfc-47d4-9c71-feeeab8bf97d/7249cc65-e620-4678-b063-717c5be00849_rw_1920.jpg?h=9ff5ae81105d83729032456d185075cd'
+];
 
 class _Rim extends StatelessWidget{
   final Post post;
@@ -121,29 +138,33 @@ class _Rim extends StatelessWidget{
         onTap: (){
           Navigator.of(context).push(MaterialPageRoute(builder: (context)=>ShowPost(post: post)));
         },
-        child: Container(
-          decoration: BoxDecoration(
+        child: Material(
+          elevation: 7,
+          child: Container(
             color: Colors.white,
-            boxShadow: [BoxShadow(
-              blurRadius: 4,
-              offset: Offset(3,3),
-              color: Colors.grey
-            )]
-          ),
-          padding: EdgeInsets.all(30/_currentSliderValue),
-          child: Stack(
-            children: <Widget>[
-              Center(child: Image.network(url)),
-              Center(
-                child: Text(
-                  post.getBody,
-                  style: TextStyle(
-                    color: Colors.white
-                  ),
+            padding: EdgeInsets.all(30/_currentSliderValue),
+            child: Stack(
+              children: <Widget>[
+                Center(
+                  child: Image.network(url[post.getId]),
+                ),
+                Center(
+                  child: Text(
+                    post.getBody,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 30/_currentSliderValue,
+                      fontFamily: 'GenEiKoburi',
+                      shadows: [Shadow(
+                        blurRadius: 20/_currentSliderValue,
+                        color: Colors.black
+                      )]
+                    ),
+                  )
                 )
-              )
-            ],
-          )
+              ],
+            )
+          ),
         ),
       ),
     );
